@@ -272,7 +272,6 @@ module.exports = generators.Base.extend({
             'gulp-grunt',
             'gulp-autoprefixer',
             'gulp-minify-css',
-            'gulp-rename',
             'gulp-ruby-sass',
             'normalize.css',
             'gulp-livereload',
