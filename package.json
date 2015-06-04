@@ -19,5 +19,5 @@
     "slug": "^0.9.1",
     "yeoman-generator": "^0.20.1"
   },
-  "repository": "https://github.com/richie-blake/generator-genfed"
+  "repository": "https://github.com/eighty-one/generator-eo-frontend"
 }
