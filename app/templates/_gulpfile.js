@@ -1,6 +1,5 @@
 var gulp = require('gulp'),
     sass = require('gulp-ruby-sass'),
-    autoprefixer = require('gulp-autoprefixer'),
     minifycss = require('gulp-minify-css'),
     browserify = require('browserify'),
     glob = require('glob'),
@@ -10,13 +9,13 @@ var gulp = require('gulp'),
     browserSync = require('browser-sync').create(),
     uglify = require('gulp-uglify'),
     buffer = require('vinyl-buffer'),
+    plumber = require('gulp-plumber'),
     jshint = require('gulp-jshint');
 
 require('gulp-grunt')(gulp);
 
 gulp.task('css', function() {
     return sass('<%= sassPath %>', {style: 'expanded'})
-        .pipe(autoprefixer('last 2 version', 'ie 8', 'ie 9'))
         .pipe(minifycss())
         .pipe(gulp.dest('<%= baseAssetPath %>css'))
         .pipe(browserSync.stream());
@@ -37,39 +36,46 @@ gulp.task('browserify', function(done) {
 
     function bundleJavaScript(srcs) {
 
-        _.each(srcs, function(src) {
+        var b = browserify(srcs);
 
-            var localName = path.relative('<%= jsPath %>', src),
-                bundle = browserify([ './' + src]).bundle();
+        b.bundle()
+            .pipe(source('site.bundled.js'))
+            .pipe(buffer())
+            .pipe(uglify())
+            .pipe(gulp.dest(path.join('./<%= baseAssetPath %>', "javascript")))
+            .on('end', function() {
+                done();
+            });
 
-            bundle.pipe(source(localName))
-                    .pipe(buffer())
-                    .pipe(jshint())
-                    .pipe(jshint.reporter('default'))
-                    .pipe(uglify())
-                    .pipe(gulp.dest(path.join('<%= baseAssetPath %>', "js")))
-                    .on('end', function() {
-                        done();
-                    });
-        });
     }
 
-    var srcs = glob.sync(path.join('<%= jsPath %>', '**', '*.js'));
+    bundleJavaScript(glob.sync('./<%= jsPath %>site.js'));
 
-    if (srcs) {
-        bundleJavaScript(srcs);
-    }
+});
+
+gulp.task('lint', function() {
+
+    return gulp.src(['./<%= jsPath %>**/*.js'])
+        .pipe(plumber())
+        .pipe(jshint({
+            jquery: false
+        }))
+        .pipe(jshint.reporter('default'));
 
 });
 
 
-gulp.task('js', ['browserify'], function() {});
+gulp.task('jsonly', ['browserify'], function(){});
+
+gulp.task('js', ['lint', 'browserify'], function() {});
 
 gulp.task('watch', ['browser-sync'], function() {
-    gulp.watch('<%= sassPath %>**/*.scss', ['css']);
-    gulp.watch('<%= jsPath %>**/*.js', ['js']);
-    gulp.watch('<%= webRootPath %>**/*.html').on('change', browserSync.reload);
-    gulp.watch('<%= webRootPath %>**/*.ss').on('change', browserSync.reload);
+    gulp.watch('./<%= sassPath %>**/*.scss', ['css']);
+    gulp.watch('./<%= jsPath %>**/*.js', ['jsonly']);
+    gulp.watch('./<%= webRootPath %>**/*.html').on('change', browserSync.reload);
+    gulp.watch('./<%= webRootPath %>**/*.ss').on('change', browserSync.reload);
+    gulp.watch('./<%= webRootPath %>**/*.ss').on('change', browserSync.reload);
+
 });
 
 gulp.task('build', ['js', 'css', 'icon'], function(done) {

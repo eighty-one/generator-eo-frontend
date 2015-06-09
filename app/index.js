@@ -243,7 +243,7 @@ module.exports = generators.Base.extend({
         mkdirp(this.destinationPath(this.pathSvg));
         mkdirp(this.destinationPath(this.baseAssetPath + 'css/'));
         mkdirp(this.destinationPath(this.baseAssetPath + 'images/'));
-        mkdirp(this.destinationPath(this.baseAssetPath + 'js/'));
+        mkdirp(this.destinationPath(this.baseAssetPath + 'javascript/'));
 
         if (this.isSilverStripe) {
             mkdirp(this.destinationPath(this.silverStripeThemePath + 'templates/Layout/'));
@@ -273,6 +273,7 @@ module.exports = generators.Base.extend({
             'gulp-autoprefixer',
             'gulp-minify-css',
             'gulp-ruby-sass',
+            'gulp-plumber',
             'normalize.css',
             'gulp-livereload',
             'browserify',
@@ -284,7 +285,8 @@ module.exports = generators.Base.extend({
             'grunt-grunticon',
             'browser-sync',
             'gulp-uglify',
-            'gulp-jshint'
+            'gulp-jshint',
+            'jquery'
         ], {
             'saveDev': true
         });
